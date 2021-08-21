@@ -1,3 +1,6 @@
+// Detecting light or dark theme
+const darkThemeMq = window.matchMedia('(prefers-color-scheme: dark)');
+
 // marker current position
 const currentPosScale = 15;
 const currentPosMarker = L.icon({
@@ -8,14 +11,14 @@ const currentPosMarker = L.icon({
 });
 // marker Running
 const runningMarker = L.icon({
-  iconUrl: '../img/running-pin.png',
+  iconUrl: `../img/running-pin${darkThemeMq ? `-dark` : ``}.png`,
   // iconUrl: '../img/MaptyMarkerRunning.png',
   iconSize: [280 / 12, 570 / 12],
   iconAnchor: [11, 44],
   popupAnchor: [0.33, -46],
 });
 const cyclingMarker = L.icon({
-  iconUrl: '../img/cycling-pin.png',
+  iconUrl: `../img/cycling-pin${darkThemeMq ? `-dark` : ``}.png`,
   // iconUrl: '../img/MaptyMarkerCycl.png',
   iconSize: [280 / 12, 570 / 12],
   iconAnchor: [11, 44],

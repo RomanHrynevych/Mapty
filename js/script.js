@@ -4,15 +4,16 @@
 const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 const form = document.querySelector('.form');
+const formRows = Array.prototype.slice.call(
+  document.querySelectorAll(`.form__row`)
+);
+
 const containerWorkouts = document.querySelector('.workouts');
 const inputType = document.querySelector('.form__input--type');
 const inputDistance = document.querySelector('.form__input--distance');
 const inputDuration = document.querySelector('.form__input--duration');
 const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
-
-// Detecting light or dark theme
-const darkThemeMq = window.matchMedia('(prefers-color-scheme: dark)');
 
 // FUNCTIONS
 const clearInputs = function () {
@@ -27,7 +28,7 @@ const clearInputs = function () {
 // initializing CLASSES
 class Workout {
   id = Number(Date.now() + '');
-  date = new Date().toISOString();
+  date = new Date();
   constructor(coords, distance, duration) {
     this.coords = coords;
     this.distance = distance; // in km
@@ -92,10 +93,10 @@ class App {
       smoothSensitivity: 2,
     }).setView(coords, 15);
     L.tileLayer(
-      `https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png`,
-      // `https://tiles.stadiamaps.com/tiles/alidade_smooth${
-      //     darkThemeMq.matches ? '_dark' : ''
-      //   }/{z}/{x}/{y}{r}.png`,
+      // `https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png`,
+      `https://tiles.stadiamaps.com/tiles/alidade_smooth${
+        darkThemeMq.matches ? '_dark' : ''
+      }/{z}/{x}/{y}{r}.png`,
       {
         minZoom: 4,
         maxZoom: 18,
@@ -116,17 +117,62 @@ class App {
   }
   #newWorkout(e) {
     e.preventDefault();
-    this.#renderWorkoutMarker(
-      this.#mapEvent,
-      inputType.value,
-      `Roman Hrynevych`
-    );
-    clearInputs();
-    form.classList.add('hidden');
+    let flag = true;
+    formRows.slice(1).forEach(el => {
+      if (
+        !el.classList.contains('form__row--hidden') &&
+        (el.children[1].value === '' ||
+          Number(el.children[1].value) < 0 ||
+          isNaN(Number(el.children[1].value)))
+      ) {
+        flag = false;
+      }
+    });
+    if (flag) {
+      let workout;
+      const { lat, lng } = this.#mapEvent.latlng;
+
+      console.log(lat, lng);
+      if (inputType.value === 'running') {
+        workout = new Running(
+          [lat, lng],
+          +inputDistance.value,
+          +inputDuration.value,
+          +inputCadence.value
+        );
+      } else {
+        workout = new Cycling(
+          [lat, lng],
+          +inputDistance.value,
+          +inputDuration.value,
+          +inputElevation.value
+        );
+      }
+      this.#renderWorkoutMarker(this.#mapEvent, inputType.value, workout);
+      this.#renderWorkout(workout);
+      clearInputs();
+      form.classList.add('hidden');
+    } else {
+      alert('Inputs have to be positive numbers!');
+      return;
+    }
   }
-  #renderWorkoutMarker(mapEvent, type, content) {
-    if (type === 'running') type = runningMarker;
-    else type = cyclingMarker;
+  #renderWorkout(workout) {
+    console.log(workout);
+  }
+  #renderWorkoutMarker(mapEvent, type, workout) {
+    let content;
+    if (type === 'running') {
+      type = runningMarker;
+      content = `🏃‍♂️ Running on ${
+        months[workout.date.getMonth()]
+      } ${workout.date.getDate()}`;
+    } else {
+      type = cyclingMarker;
+      content = `🚴‍♀️ Cycling on ${
+        months[workout.date.getMonth()]
+      } ${workout.date.getDate()}`;
+    }
     const { lat, lng } = mapEvent.latlng;
     L.marker([lat, lng], { icon: type })
       .addTo(this.#map)

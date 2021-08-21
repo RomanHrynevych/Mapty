@@ -4,16 +4,33 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <link rel="shortcut icon" type="image/png" href="/icon.png" />
+    <link rel="shortcut icon" type="image/png" href="img/icon.png" />
 
     <link
       href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap"
       rel="stylesheet"
     />
 
-    <link rel="stylesheet" href="style.css" />
+    <!-- leaflet CSS -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+      integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+      crossorigin=""
+    />
+    <!-- Mapty CSS -->
+    <link rel="stylesheet" href="css/style.css" />
 
-    <script defer src="script.js"></script>
+    <!-- leaflet JS -->
+    <script
+      defer
+      src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+      integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+      crossorigin=""
+    ></script>
+    <!-- Mapty JS -->
+    <script defer src="js/leaflet-custom-settings.js"></script>
+    <script defer src="js/script.js"></script>
     <title>mapty // Map your workouts</title>
   </head>
   <body>
@@ -57,7 +74,7 @@
           <button class="form__btn">OK</button>
         </form>
 
-        <!-- <li class="workout workout--running" data-id="1234567890">
+        <li class="workout workout--running" data-id="1234567890">
           <h2 class="workout__title">Running on April 14</h2>
           <div class="workout__details">
             <span class="workout__icon">🏃‍♂️</span>
@@ -103,7 +120,7 @@
             <span class="workout__value">223</span>
             <span class="workout__unit">m</span>
           </div>
-        </li> -->
+        </li>
       </ul>
 
       <p class="copyright">
@@ -113,6 +130,9 @@
           target="_blank"
           href="https://twitter.com/jonasschmedtman"
           >Jonas Schmedtmann</a
+        >. Modified by
+        <a class="twitter-link" href="https://www.instagram.com/grinevichroman/"
+          >Roman Hrynevych</a
         >. Use for learning or your portfolio. Don't use to teach. Don't claim
         as your own.
       </p>

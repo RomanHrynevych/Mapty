@@ -212,9 +212,9 @@ a:visited {
   background-color: var(--color-dark--1);
 }
 
-.run-popup .leaflet-popup-content-wrapper {
+.running-popup .leaflet-popup-content-wrapper {
   border-left: 5px solid var(--color-brand--2);
 }
-.cycl-popup .leaflet-popup-content-wrapper {
+.cycling-popup .leaflet-popup-content-wrapper {
   border-left: 5px solid var(--color-brand--1);
 }

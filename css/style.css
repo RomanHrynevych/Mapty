@@ -85,9 +85,36 @@ a:visited {
 }
 
 .workout__title {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.workout__title h2 {
   font-size: 1.7rem;
   font-weight: 600;
-  grid-column: 1 / -1;
+}
+.workout:hover .workout__features {
+  opacity: 1;
+}
+.workout__features {
+  opacity: 0;
+  transition: all 0.3s;
+  font-size: 1.7rem;
+  color: var(--color-light--1);
+}
+.workout__features .icon__edit {
+  margin-right: 0.5rem;
+}
+.workout__features .icon__edit,
+.workout__features .icon__delete {
+  transition: all 0.3s;
+}
+
+.workout__features .icon__edit:hover,
+.workout__features .icon__delete:hover {
+  color: #fff;
+  transition: all 0.3s;
 }
 
 .workout__details {

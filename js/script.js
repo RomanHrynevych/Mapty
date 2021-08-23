@@ -16,7 +16,7 @@ const inputElevation = document.querySelector('.form__input--elevation');
 class Workout {
   id = Date.now() + '';
   date = new Date();
-
+  marker;
   constructor(coords, distance, duration) {
     this.coords = coords;
     this.distance = distance; // in km
@@ -29,10 +29,15 @@ class Workout {
       months[this.date.getMonth()]
     } ${this.date.getDate()}`;
   }
+
+  _changeIdAndDate(id, date) {
+    this.id = id;
+    this.date = date;
+  }
 }
 class Running extends Workout {
   type = 'running';
-  marker = L.icon({
+  markerType = L.icon({
     iconUrl: `../img/running-pin${darkThemeMq.matches ? `-dark` : ``}.png`,
     iconSize: [280 / 12, 570 / 12],
     iconAnchor: [11, 44],
@@ -52,7 +57,7 @@ class Running extends Workout {
 }
 class Cycling extends Workout {
   type = 'cycling';
-  marker = L.icon({
+  markerType = L.icon({
     iconUrl: `../img/cycling-pin${darkThemeMq.matches ? `-dark` : ``}.png`,
     iconSize: [280 / 12, 570 / 12],
     iconAnchor: [11, 44],
@@ -79,6 +84,9 @@ class App {
   constructor() {
     this.#getPosition();
 
+    // load workouts from local storage
+    this.#loadWorkouts();
+
     // changing type of workout
     inputType.addEventListener('change', this.#toggleElevationField);
 
@@ -86,13 +94,61 @@ class App {
     form.addEventListener('submit', this.#newWorkout.bind(this));
 
     // On workout click move to him on map
-    containerWorkouts.addEventListener('click', this.#moveToPopup.bind(this));
+    containerWorkouts.addEventListener(
+      'click',
+      function (e) {
+        if (e.target.classList.contains('workout__edit')) {
+          console.log('edit');
+          return;
+        }
+
+        if (e.target.classList.contains('workout__delete')) {
+          this.#removeWorkout(e);
+          return;
+        }
+
+        this.#moveToPopup(e);
+      }.bind(this)
+    );
 
     // On esc click close form
     document.addEventListener(
       'keydown',
       function (e) {
         if (e.key === 'Escape') this.#hideForm(false);
+        if (e.key === '`') {
+        }
+      }.bind(this)
+    );
+  }
+
+  #removeWorkout(e) {
+    // Initialize nedded variables
+    const workout = this.#workouts.find(
+      el => el.id === e.target.closest('.workout').dataset.id
+    );
+    const data = JSON.parse(localStorage.getItem('workouts'));
+    const DOM = document.querySelectorAll(`.workout`);
+    const index = data.findIndex(el => el.id === workout.id);
+
+    // Remove workout from DOM, localStorage and #workouts array
+    DOM[this.#workouts.length - index - 1].remove();
+    this.#workouts.splice(index, 1);
+    data.splice(index, 1);
+
+    // Change local Storage
+    localStorage.setItem('workouts', JSON.stringify(data));
+
+    // Remove marker
+    const latlng = {
+      lat: workout.coords[0],
+      lng: workout.coords[1],
+    };
+    this.#map.eachLayer(
+      function (layer) {
+        if (JSON.stringify({ ...layer._latlng }) === JSON.stringify(latlng)) {
+          this.#map.removeLayer(layer);
+        }
       }.bind(this)
     );
   }
@@ -129,6 +185,7 @@ class App {
 
     L.marker(coords, { icon: currentPosMarker }).addTo(this.#map);
     this.#map.on('click', this.#showForm.bind(this));
+    this.#workouts.forEach(el => this.#renderWorkoutMarker(el));
   }
   #showForm(mapE) {
     this.#mapEvent = mapE;
@@ -173,15 +230,42 @@ class App {
 
       workout = new Cycling(coords, distance, duration, elevationGain);
     }
-    this.#workouts.push(workout);
+    this.#saveWorkout(workout);
     this.#renderWorkoutMarker(workout);
     this.#renderWorkout(workout);
     this.#hideForm(true);
   }
+  #renderWorkoutMarker(workout) {
+    L.marker(workout.coords, { icon: workout.markerType })
+      .addTo(this.#map)
+      .bindPopup(
+        L.popup({
+          maxWidth: 250,
+          minWidth: 100,
+          autoClose: false,
+          closeOnClick: false,
+          className: `${workout.type}-popup`,
+        })
+      )
+      .setPopupContent(
+        `${workout.type === 'running' ? '🏃‍♂️' : '🚴‍♀️'} ${workout.description}`
+      )
+      .openPopup();
+  }
   #renderWorkout(workout) {
     let html = `
     <li class="workout workout--${workout.type}" data-id="${workout.id}">
-      <h2 class="workout__title">${workout.description}</h2>
+    <span class="workout__title">
+      <h2>${workout.description}</h2>
+      <span class="workout__features">
+        <span class="icon__edit"
+        ><ion-icon class="workout__edit" name="pencil"></ion-icon
+        ></span>
+        <span class="icon__delete"
+        ><ion-icon class="workout__delete" name="trash"></ion-icon
+        ></span>
+      </span>
+    </span>
       <div class="workout__details">
         <span class="workout__icon">${
           workout.type === 'running' ? '🏃‍♂️' : '🚴‍♀️'
@@ -228,23 +312,6 @@ class App {
 
     form.insertAdjacentHTML('afterend', html);
   }
-  #renderWorkoutMarker(workout) {
-    L.marker(workout.coords, { icon: workout.marker })
-      .addTo(this.#map)
-      .bindPopup(
-        L.popup({
-          maxWidth: 250,
-          minWidth: 100,
-          autoClose: false,
-          closeOnClick: false,
-          className: `${workout.type}-popup`,
-        })
-      )
-      .setPopupContent(
-        `${workout.type === 'running' ? '🏃‍♂️' : '🚴‍♀️'} ${workout.description}`
-      )
-      .openPopup();
-  }
   #hideForm(flag) {
     inputCadence.value =
       inputDistance.value =
@@ -259,6 +326,7 @@ class App {
 
     setTimeout(() => (form.style.display = 'grid'), 100);
   }
+
   #moveToPopup(e) {
     const htmlWorkout = e.target.closest('.workout');
 
@@ -267,6 +335,34 @@ class App {
     const workout = this.#workouts.find(el => el.id === htmlWorkout.dataset.id);
     this.#map.flyTo(workout.coords, 15);
   }
+
+  #saveWorkout(workout) {
+    this.#workouts.push(workout);
+    localStorage.setItem('workouts', JSON.stringify(this.#workouts));
+  }
+
+  #loadWorkouts() {
+    const data = JSON.parse(localStorage.getItem('workouts'));
+
+    if (!data) return;
+    let workout;
+    data.forEach(
+      function (el) {
+        if (el.type === 'running') {
+          // prettier-ignore
+          workout = new Running(el.coords, el.distance, el.duration, el.cadence);
+        }
+        if (el.type === 'cycling') {
+          // prettier-ignore
+          workout = new Cycling(el.coords, el.distance, el.duration, el.elevationGain);
+        }
+        workout._changeIdAndDate(el.id, el.date);
+        this.#workouts.push(workout);
+      }.bind(this)
+    );
+    this.#workouts.forEach(el => this.#renderWorkout(el));
+  }
 }
 
 const app = new App();
+// localStorage.clear();

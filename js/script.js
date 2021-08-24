@@ -254,9 +254,10 @@ class App {
     }).setView(coords, 15);
     L.tileLayer(
       // `https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png`,
-      `https://tiles.stadiamaps.com/tiles/alidade_smooth${
-        darkThemeMq.matches ? '_dark' : ''
-      }/{z}/{x}/{y}{r}.png`,
+      // `https://tiles.stadiamaps.com/tiles/alidade_smooth${
+      //   darkThemeMq.matches ? '_dark' : ''
+      // }/{z}/{x}/{y}{r}.png`,
+      'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       {
         minZoom: 4,
         maxZoom: 18,

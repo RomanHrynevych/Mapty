@@ -40,7 +40,7 @@ class Workout {
 class Running extends Workout {
   type = 'running';
   markerType = L.icon({
-    iconUrl: `../img/running-pin${darkThemeMq.matches ? `-dark` : ``}.png`,
+    iconUrl: `./img/running-pin${darkThemeMq.matches ? `-dark` : ``}.png`,
     iconSize: [280 / 12, 570 / 12],
     iconAnchor: [11, 44],
     popupAnchor: [0.33, -46],
@@ -60,7 +60,7 @@ class Running extends Workout {
 class Cycling extends Workout {
   type = 'cycling';
   markerType = L.icon({
-    iconUrl: `../img/cycling-pin${darkThemeMq.matches ? `-dark` : ``}.png`,
+    iconUrl: `./img/cycling-pin${darkThemeMq.matches ? `-dark` : ``}.png`,
     iconSize: [280 / 12, 570 / 12],
     iconAnchor: [11, 44],
     popupAnchor: [0.33, -46],

@@ -6,7 +6,7 @@ else body.style.backgroundColor = `#fff`;
 // marker current position
 const currentPosScale = 15;
 const currentPosMarker = L.icon({
-  iconUrl: '../img/person.png',
+  iconUrl: './img/person.png',
   iconSize: [240 / currentPosScale, 520 / currentPosScale],
   iconAnchor: [120 / currentPosScale, 504 / currentPosScale],
   popupAnchor: [3.96 / currentPosScale, -492 / currentPosScale],

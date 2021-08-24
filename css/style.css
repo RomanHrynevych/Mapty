@@ -1,12 +1,16 @@
 :root {
   --color-brand--1: #ffb545;
   --color-brand--2: #00c46a;
+  --color-red: #ff0000;
 
   --color-dark--1: #2d3439;
+  --color-dark--1--opacity: rgba(45, 52, 57, 0.7);
   --color-dark--2: #42484d;
   --color-light--1: #aaa;
   --color-light--2: #ececec;
   --color-light--3: rgb(214, 222, 224);
+
+  --color-popup-wrapper: rgba(42, 42, 42, 0.8);
 }
 
 * {
@@ -72,11 +76,19 @@ a:visited {
   padding: 1.5rem 2.25rem;
   margin-bottom: 1.75rem;
   cursor: pointer;
-
+  z-index: 9;
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr;
   gap: 0.75rem 1.5rem;
 }
+
+.workout.workout__delete {
+  transition: all 0.3s;
+  transform: scale(0);
+  opacity: 0;
+  z-index: -1;
+}
+
 .workout--running {
   border-left: 5px solid var(--color-brand--2);
 }
@@ -113,6 +125,23 @@ a:visited {
 
 .workout__features .icon__edit:hover,
 .workout__features .icon__delete:hover {
+  color: #fff;
+  transition: all 0.3s;
+}
+.w--form {
+  cursor: default;
+}
+.w--form .edit--control .icon:first-child {
+  margin-right: 0.6rem;
+}
+.w--form .edit--control .icon ion-icon {
+  transition: all 0.3s;
+  font-size: 1.7rem;
+  transform: scale(1.25);
+  cursor: pointer;
+  color: var(--color-light--1);
+}
+.w--form .edit--control .icon:hover ion-icon {
   color: #fff;
   transition: all 0.3s;
 }
@@ -244,4 +273,86 @@ a:visited {
 }
 .cycling-popup .leaflet-popup-content-wrapper {
   border-left: 5px solid var(--color-brand--1);
+}
+
+/* Roman Hrynevych styles */
+.popup--wrapper.hidden {
+  opacity: 0;
+  display: none;
+}
+.popup--wrapper {
+  position: fixed;
+  cursor: pointer;
+  display: block;
+  opacity: 1;
+  margin-left: -2.5rem;
+  margin-top: -2.5rem;
+  width: 100vw;
+  height: 100vh;
+  background: var(--color-popup-wrapper);
+  z-index: 9999;
+  backdrop-filter: blur(0.2rem);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.popup {
+  cursor: default;
+  transform: scale(0);
+  background: var(--color-dark--1);
+  max-width: 400px;
+  text-align: center;
+  padding: 2rem 4rem;
+  border-radius: 1rem;
+  font-size: 1.7rem;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s;
+}
+.popup.popup--active {
+  transform: scale(1);
+  transition: all 0.3s;
+}
+.popup .popup--buttons {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: center;
+}
+.popup .popup--buttons button {
+  cursor: pointer;
+  width: 34%;
+  padding: 0.5rem 0;
+  font-size: 1.6rem;
+  background: none;
+  border: none;
+  margin: 0 0.75rem;
+}
+.popup .popup--buttons .popup-yes {
+  color: var(--color-brand--2);
+  border: solid 0.2rem var(--color-brand--2);
+  border-radius: 5px;
+  transition: all 0.3s;
+}
+.popup .popup--buttons .popup-yes:hover {
+  color: #fff;
+  background-color: var(--color-brand--2);
+}
+.popup .popup--buttons .popup-no {
+  color: #fff;
+  background: var(--color-red);
+  border: solid 0.2rem var(--color-red);
+  border-radius: 5px;
+}
+
+/* Workout Edit */
+.workout--edit--input {
+  width: 100%;
+  outline: none;
+  border: none;
+  border-radius: 2px;
+  height: 80%;
+  padding-left: 3px;
+  vertical-align: middle;
+  background: var(--color-dark--1);
+  color: #fff;
 }

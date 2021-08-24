@@ -74,27 +74,25 @@
           <button class="form__btn">OK</button>
         </form>
 
-        <!-- <li class="workout workout--running" data-id="1629731483051">
+        <!-- <li class="workout workout--running w--form">
           <span class="workout__title">
             <h2>Running on August 23</h2>
-            <span class="workout__features">
-              <span class="icon__edit"
-                ><ion-icon class="workout__edit" name="pencil"></ion-icon
+            <span class="edit--control">
+              <span class="icon icon--accept"
+                ><ion-icon name="checkmark-done"></ion-icon
               ></span>
-              <span class="icon__delete"
-                ><ion-icon class="workout__delete" name="trash"></ion-icon
+              <span class="icon icon--decline"
+                ><ion-icon name="close"></ion-icon
               ></span>
             </span>
           </span>
           <div class="workout__details">
             <span class="workout__icon">🏃‍♂️</span>
-            <span class="workout__value">3</span>
-            <span class="workout__unit">km</span>
+            <input type="text" class="workout--edit--input" name="" />
           </div>
           <div class="workout__details">
             <span class="workout__icon">⏱</span>
-            <span class="workout__value">2</span>
-            <span class="workout__unit">min</span>
+            <input type="text" class="workout--edit--input" name="" />
           </div>
           <div class="workout__details">
             <span class="workout__icon">⚡️</span>
@@ -103,8 +101,7 @@
           </div>
           <div class="workout__details">
             <span class="workout__icon">🦶🏼</span>
-            <span class="workout__value">1</span>
-            <span class="workout__unit">spm</span>
+            <input type="text" class="workout--edit--input" name="" />
           </div>
         </li> -->
       </ul>
@@ -125,6 +122,17 @@
     </div>
 
     <div id="map"></div>
+
+    <div class="popup--wrapper hidden">
+      <div class="popup delete--popup">
+        Do you want to delete the workout permanently? This effect is
+        irreversible
+        <span class="popup--buttons">
+          <button class="popup-yes">Yes</button>
+          <button class="popup-no">No</button>
+        </span>
+      </div>
+    </div>
 
     <!-- ionicons src's  -->
     <script

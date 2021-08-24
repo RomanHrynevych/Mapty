@@ -11,22 +11,6 @@ const currentPosMarker = L.icon({
   iconAnchor: [120 / currentPosScale, 504 / currentPosScale],
   popupAnchor: [3.96 / currentPosScale, -492 / currentPosScale],
 });
-// marker Running
-// const runningMarker = L.icon({
-//   iconUrl: `../img/running-pin${darkThemeMq.matches ? `-dark` : ``}.png`,
-//   // iconUrl: '../img/MaptyMarkerRunning.png',
-//   iconSize: [280 / 12, 570 / 12],
-//   iconAnchor: [11, 44],
-//   popupAnchor: [0.33, -46],
-// });
-// const cyclingMarker = L.icon({
-//   iconUrl: `../img/cycling-pin${darkThemeMq.matches ? `-dark` : ``}.png`,
-//   // iconUrl: '../img/MaptyMarkerCycl.png',
-//   iconSize: [280 / 12, 570 / 12],
-//   iconAnchor: [11, 44],
-//   popupAnchor: [0.33, -46],
-// });
-//
 
 // smooth zoom for leaflet
 L.Map.mergeOptions({

@@ -32,9 +32,10 @@ class Workout {
     } ${this.date.getDate()}`;
   }
 
-  _changeIdAndDate(id, date) {
+  _changeIdDateDescription(id, date, description) {
     this.id = id;
     this.date = date;
+    this.description = description;
   }
 }
 class Running extends Workout {
@@ -86,6 +87,9 @@ class App {
 
   constructor() {
     this.globalEvent;
+    this.elementToEdit = null;
+    this.elementToEditId = null;
+    this.editFlag = false;
     this.#getPosition();
 
     // load workouts from local storage
@@ -123,27 +127,65 @@ class App {
       }.bind(this)
     );
 
+    document.addEventListener('click', e => {
+      if (document.querySelector(`.w--form`)) {
+        if (
+          !this.editFlag &&
+          this.elementToEdit === null &&
+          this.elementToEditId === null
+        ) {
+          this.elementToEdit = e.target.closest('.workout');
+          this.elementToEditId = this.elementToEdit.dataset.id;
+        } else {
+          if (!e.target.closest('.workout')) {
+            this.#_editBranchingDecline(this.elementToEdit);
+            return;
+          } else if (
+            typeof e.target.closest('.workout')?.dataset.id === 'undefined'
+          ) {
+            return;
+          } else if (
+            e.target.closest('.workout')?.dataset.id !== this.elementToEditId
+          ) {
+            this.#_editBranchingDecline(this.elementToEdit);
+            return;
+          }
+        }
+        this.editFlag = true;
+      }
+    });
+
     // On workout click move to him on map
     containerWorkouts.addEventListener(
       'click',
       function (e) {
+        // Edit Function
         if (e.target.classList.contains('workout__edit')) {
+          document
+            .querySelectorAll(`.workout__features`)
+            .forEach(el => (el.style.display = `none`));
           const element = e.target.closest('.workout');
           const workout = this.#workouts.find(
             el => el.id === element.dataset.id
           );
           const editFormHTML = this.#swapToEditHTML(workout);
           let doc = new DOMParser().parseFromString(editFormHTML, 'text/html');
-          console.log(doc.body.children[0]);
-          console.log(element);
-          console.log(workout);
           element.parentNode.replaceChild(doc.body.children[0], element);
 
-          document
-            .querySelector(`.w--form`)
-            .addEventListener('click', function (e) {
-              console.log(e);
-            });
+          document.querySelector(`.edit--distance`).focus();
+
+          document.querySelector(`.w--form`).addEventListener('click', e => {
+            this.#_editBranching(e, element, workout);
+          });
+
+          document.querySelector(`.w--form`).addEventListener('keydown', e => {
+            if (e.key === 'Enter') {
+              this.#_editBranchingAccept(workout);
+            }
+            if (e.key === `Escape`) {
+              this.#_editBranchingDecline(element);
+            }
+          });
 
           return;
         }
@@ -161,7 +203,86 @@ class App {
     );
   }
 
-  // Edit Functions
+  #_editBranching(e, element, workout) {
+    if (e.target.closest('.icon')?.classList.contains('icon--decline')) {
+      // Decline Editing
+      this.#_editBranchingDecline(element);
+    }
+    if (e.target.closest('.icon')?.classList.contains('icon--accept')) {
+      // Edit accept
+      this.#_editBranchingAccept(workout);
+    }
+  }
+
+  #_editBranchingDecline(element) {
+    containerWorkouts.replaceChild(element, document.querySelector(`.w--form`));
+    document
+      .querySelectorAll(`.workout__features`)
+      .forEach(el => (el.style.display = `block`));
+    this.elementToEdit = this.elementToEditId = null;
+    this.editFlag = false;
+  }
+
+  #_editBranchingAccept(workout) {
+    const duration = +document.querySelector(`.edit--duration`).value;
+    const distance = +document.querySelector(`.edit--distance`).value;
+    const cadEvel = +document.querySelector(`.edit--cad--elev`).value;
+
+    if (
+      !this.#checkForNumber(distance, duration, cadEvel) ||
+      !this.#checkForPositiveNumber(
+        distance,
+        duration,
+        workout.type === 'running' ? cadEvel : 1
+      )
+    )
+      return workout.type === 'running'
+        ? alert('Inputs have to be positive numbers!')
+        : alert('Inputs have to be positive numbers! Except "Elev Gain"');
+
+    // recalculate workout features
+    workout.distance = distance;
+    workout.duration = duration;
+
+    workout.type === `running`
+      ? (workout.cadence = cadEvel)
+      : (workout.elevationGain = cadEvel);
+
+    workout.type === `running` ? workout.calcPace() : workout.calcSpeed();
+
+    this.#_saveEditWorkoutToLocalStorage(workout);
+    document
+      .querySelectorAll(`.workout__features`)
+      .forEach(el => (el.style.display = `block`));
+  }
+
+  #_saveEditWorkoutToLocalStorage(workout) {
+    // Parse new workout to DOM
+    let doc = new DOMParser().parseFromString(
+      this.#renderWorkout(workout, `edit`),
+      'text/html'
+    );
+
+    // Replace edit form by new HTML DOM
+    containerWorkouts.replaceChild(
+      doc.body.children[0],
+      document.querySelector(`.w--form`)
+    );
+
+    // make changes in localStorage
+    const data = JSON.parse(localStorage.getItem('workouts'));
+    if (!data) return;
+
+    data.forEach((el, index) => {
+      if (el.id === workout.id) {
+        data[index] = workout;
+      }
+    }, data);
+    localStorage.setItem('workouts', JSON.stringify(this.#workouts));
+    this.elementToEdit = this.elementToEditId = null;
+    this.editFlag = false;
+  }
+
   #swapToEditHTML(workout) {
     return `
     <li class="workout workout--${workout.type} w--form">
@@ -180,11 +301,15 @@ class App {
         <span class="workout__icon">${
           workout.type === 'running' ? '🏃‍♂️' : '🚴‍♀️'
         }</span>
-        <input type="text" class="workout--edit--input" name="" />
+        <input type="text" class="workout--edit--input edit--distance" name="" value="${
+          workout.distance
+        }" />
       </div>
       <div class="workout__details">
         <span class="workout__icon">⏱</span>
-        <input type="text" class="workout--edit--input" name="" />
+        <input type="text" class="workout--edit--input edit--duration" name="" value="${
+          workout.duration
+        }"/>
       </div>
       <div class="workout__details">
         <span class="workout__icon">⚡️</span>
@@ -198,8 +323,14 @@ class App {
         }</span>
       </div>
       <div class="workout__details">
-        <span class="workout__icon">🦶🏼</span>
-        <input type="text" class="workout--edit--input" name="" />
+        <span class="workout__icon">${
+          workout.type === 'running' ? '🦶🏼' : '⛰'
+        }</span>
+        <input type="text" class="workout--edit--input edit--cad--elev" name="" value="${
+          workout.type === 'running'
+            ? `${workout.cadence}`
+            : `${workout.elevationGain}`
+        }" />
       </div>
     </li>
     `;
@@ -252,12 +383,12 @@ class App {
       smoothWheelZoom: true,
       smoothSensitivity: 2,
     }).setView(coords, 15);
+
     L.tileLayer(
       // `https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png`,
       `https://tiles.stadiamaps.com/tiles/alidade_smooth${
         darkThemeMq.matches ? '_dark' : ''
       }/{z}/{x}/{y}{r}.png`,
-      // 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       {
         minZoom: 4,
         maxZoom: 18,
@@ -301,10 +432,6 @@ class App {
   // Workout Functions
   #newWorkout(e) {
     e.preventDefault();
-    // function helpers
-    const checkForNumber = (...arr) => arr.every(el => Number.isFinite(el));
-    const checkForPositiveNumber = (...arr) => arr.every(el => el > 0);
-
     let workout;
     const { lat, lng } = this.#mapEvent.latlng;
     const coords = [lat, lng];
@@ -313,10 +440,9 @@ class App {
     const duration = +inputDuration.value;
     if (type === 'running') {
       const cadence = +inputCadence.value;
-      console.log();
       if (
-        !checkForNumber(distance, duration, cadence) ||
-        !checkForPositiveNumber(distance, duration, cadence)
+        !this.#checkForNumber(distance, duration, cadence) ||
+        !this.#checkForPositiveNumber(distance, duration, cadence)
       )
         return alert('Inputs have to be positive numbers!');
 
@@ -326,8 +452,8 @@ class App {
     if (type === 'cycling') {
       const elevationGain = +inputElevation.value;
       if (
-        !checkForNumber(distance, duration, elevationGain) ||
-        !checkForPositiveNumber(distance, duration)
+        !this.#checkForNumber(distance, duration, elevationGain) ||
+        !this.#checkForPositiveNumber(distance, duration)
       )
         return alert('Inputs have to be positive numbers! Except "Elev Gain"');
 
@@ -335,7 +461,7 @@ class App {
     }
     this.#saveWorkout(workout);
     this.#renderWorkoutMarker(workout);
-    this.#renderWorkout(workout);
+    this.#renderWorkout(workout, `new`);
     this.#hideForm(true);
   }
   #renderWorkoutMarker(workout) {
@@ -355,7 +481,7 @@ class App {
       )
       .openPopup();
   }
-  #renderWorkout(workout) {
+  #renderWorkout(workout, type) {
     let html = `
     <li class="workout workout--${workout.type}" data-id="${workout.id}">
     <span class="workout__title">
@@ -413,7 +539,12 @@ class App {
       `;
     }
 
-    form.insertAdjacentHTML('afterend', html);
+    if (type === `new`) {
+      form.insertAdjacentHTML('afterend', html);
+    }
+    if (type === `edit`) {
+      return html;
+    }
   }
 
   #saveWorkout(workout) {
@@ -436,11 +567,11 @@ class App {
           // prettier-ignore
           workout = new Cycling(el.coords, el.distance, el.duration, el.elevationGain);
         }
-        workout._changeIdAndDate(el.id, el.date);
+        workout._changeIdDateDescription(el.id, el.date, el.description);
         this.#workouts.push(workout);
       }.bind(this)
     );
-    this.#workouts.forEach(el => this.#renderWorkout(el));
+    this.#workouts.forEach(el => this.#renderWorkout(el, `new`));
   }
   #removeWorkout(e) {
     // Initialize nedded variables
@@ -480,6 +611,8 @@ class App {
       }.bind(this)
     );
   }
+  #checkForNumber = (...arr) => arr.every(el => Number.isFinite(el));
+  #checkForPositiveNumber = (...arr) => arr.every(el => el > 0);
 }
 
 const app = new App();

@@ -201,8 +201,22 @@ class App {
         }
       }.bind(this)
     );
-  }
 
+    const optionsBtn = document.querySelector(`.global--options--btn`);
+    const optionsElement = document.querySelector(`.options`);
+
+    optionsBtn.addEventListener('click', function (e) {
+      optionsBtn.classList.toggle('active');
+      optionsElement.classList.toggle('active');
+      if (optionsBtn.getAttribute('name') === `close`) {
+        optionsBtn.setAttribute('name', `options`);
+      } else {
+        optionsBtn.setAttribute('name', `close`);
+      }
+    });
+  }
+  //////////////////////////
+  // Editing Functions
   #_editBranching(e, element, workout) {
     if (e.target.closest('.icon')?.classList.contains('icon--decline')) {
       // Decline Editing
@@ -390,7 +404,7 @@ class App {
         darkThemeMq.matches ? '_dark' : ''
       }/{z}/{x}/{y}{r}.png`,
       {
-        minZoom: 4,
+        minZoom: 1.75,
         maxZoom: 18,
       }
     ).addTo(this.#map);

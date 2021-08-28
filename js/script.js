@@ -91,7 +91,13 @@ class App {
     this.elementToEditId = null;
     this.editFlag = false;
     this.#getPosition();
-
+    this.oneRem =
+      Number(
+        window
+          .getComputedStyle(document.querySelector(`body`), null)
+          .getPropertyValue('padding')
+          .slice(0, -2)
+      ) / 2.5;
     // load workouts from local storage
     this.#loadWorkouts();
 
@@ -213,31 +219,35 @@ class App {
 
     //////////////////////////
     // Options Functions
+
     const optionsBtn = document.querySelector(`.global--options--btn`);
     const optionsElement = document.querySelector(`.options`);
     optionsElement.style.left = `${
       document.querySelector(`.sidebar`).offsetWidth -
       optionsElement.offsetWidth +
-      1.5 * 32
+      4 * this.oneRem
     }px`;
 
-    optionsBtn.addEventListener('click', function (e) {
-      optionsBtn.classList.toggle('active');
-      optionsElement.classList.toggle('active');
-      if (optionsBtn.getAttribute('name') === `close`) {
-        optionsElement.style.left = `${
-          document.querySelector(`.sidebar`).offsetWidth -
-          optionsElement.offsetWidth +
-          1.5 * 32
-        }px`;
-        optionsBtn.setAttribute('name', `options`);
-      } else {
-        optionsElement.style.left = `${
-          document.querySelector(`.sidebar`).offsetWidth + 31.2
-        }px`;
-        optionsBtn.setAttribute('name', `close`);
-      }
-    });
+    optionsBtn.addEventListener(
+      'click',
+      function (e) {
+        optionsBtn.classList.toggle('active');
+        optionsElement.classList.toggle('active');
+        if (optionsBtn.getAttribute('name') === `close`) {
+          optionsElement.style.left = `${
+            document.querySelector(`.sidebar`).offsetWidth -
+            optionsElement.offsetWidth +
+            4 * this.oneRem
+          }px`;
+          optionsBtn.setAttribute('name', `options`);
+        } else {
+          optionsElement.style.left = `${
+            document.querySelector(`.sidebar`).offsetWidth + 2.5 * this.oneRem
+          }px`;
+          optionsBtn.setAttribute('name', `close`);
+        }
+      }.bind(this)
+    );
 
     const deleteAllWorkoutsBtn = document.querySelector(`.delete--all`);
     deleteAllWorkoutsBtn.addEventListener(

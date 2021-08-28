@@ -79,32 +79,73 @@
 
         <!-- <li class="workout workout--running w--form">
           <span class="workout__title">
-            <h2>Running on August 23</h2>
+            <h2>Running on August 27</h2>
             <span class="edit--control">
               <span class="icon icon--accept"
-                ><ion-icon name="checkmark-done"></ion-icon
+                ><ion-icon
+                  name="checkmark-done"
+                  role="img"
+                  class="md hydrated"
+                  aria-label="checkmark done"
+                ></ion-icon
               ></span>
               <span class="icon icon--decline"
-                ><ion-icon name="close"></ion-icon
+                ><ion-icon
+                  name="close"
+                  role="img"
+                  class="md hydrated"
+                  aria-label="close"
+                ></ion-icon
               ></span>
             </span>
           </span>
           <div class="workout__details">
-            <span class="workout__icon">🏃‍♂️</span>
-            <input type="text" class="workout--edit--input" name="" />
+            <img
+              class="workout__icon emoji"
+              src="./img/emojis/running.png"
+              alt=""
+            />
+            <input
+              type="text"
+              class="workout--edit--input edit--distance"
+              name=""
+              value="3"
+            />
           </div>
           <div class="workout__details">
-            <span class="workout__icon">⏱</span>
-            <input type="text" class="workout--edit--input" name="" />
+            <img
+              class="workout__icon emoji"
+              src="./img/emojis/clock.png"
+              alt=""
+            />
+            <input
+              type="text"
+              class="workout--edit--input edit--duration"
+              name=""
+              value="34"
+            />
           </div>
           <div class="workout__details">
-            <span class="workout__icon">⚡️</span>
-            <span class="workout__value">0.7</span>
+            <img
+              class="workout__icon emoji"
+              src="./img/emojis/energy.png"
+              alt=""
+            />
+            <span class="workout__value">11.3</span>
             <span class="workout__unit">min/km</span>
           </div>
           <div class="workout__details">
-            <span class="workout__icon">🦶🏼</span>
-            <input type="text" class="workout--edit--input" name="" />
+            <img
+              class="workout__icon emoji"
+              src="./img/emojis/foot.png"
+              alt=""
+            />
+            <input
+              type="text"
+              class="workout--edit--input edit--cad--elev"
+              name=""
+              value="164"
+            />
           </div>
         </li> -->
       </ul>
@@ -128,13 +169,22 @@
         <ion-icon class="js" name="logo-javascript"></ion-icon>
       </ul>
     </div>
-    <div class="options">Roman Hrynevych</div>
+
+    <!-- Options block -->
+    <div class="options">
+      <ul class="options--buttons">
+        <button class="options--button delete--all">
+          <span>Delete all workouts</span>
+          <ion-icon name="trash"></ion-icon>
+        </button>
+      </ul>
+    </div>
+
     <div id="map"></div>
 
     <div class="popup--wrapper hidden">
       <div class="popup delete--popup">
-        Do you want to delete the workout permanently? This effect is
-        irreversible
+        <span class="popup--text"></span>
         <span class="popup--buttons">
           <button class="popup-yes">Yes</button>
           <button class="popup-no">No</button>

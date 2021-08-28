@@ -105,13 +105,22 @@ class App {
       'click',
       function (e) {
         if (e.target.classList.contains('popup-yes')) {
-          this.#removeWorkout(this.globalEvent);
+          if (this.globalEvent) {
+            this.#removeWorkout(this.globalEvent);
+          } else {
+            this.#removeAllWorkouts();
+            optionsBtn.click();
+          }
+
           this.#hidePopupForm();
         }
         if (
           e.target.classList.contains('popup-no') ||
           e.target.classList.contains('popup--wrapper')
         ) {
+          if (!this.globalEvent) {
+            optionsBtn.click();
+          }
           this.#hidePopupForm();
         }
       }.bind(this)
@@ -191,7 +200,7 @@ class App {
         }
 
         if (e.target.classList.contains('workout__delete')) {
-          this.#showPopupForm();
+          this.#showPopupForm(false);
           this.globalEvent = e;
           return;
         }
@@ -202,18 +211,60 @@ class App {
       }.bind(this)
     );
 
+    //////////////////////////
+    // Options Functions
     const optionsBtn = document.querySelector(`.global--options--btn`);
     const optionsElement = document.querySelector(`.options`);
+    optionsElement.style.left = `${
+      document.querySelector(`.sidebar`).offsetWidth -
+      optionsElement.offsetWidth +
+      1.5 * 32
+    }px`;
 
     optionsBtn.addEventListener('click', function (e) {
       optionsBtn.classList.toggle('active');
       optionsElement.classList.toggle('active');
       if (optionsBtn.getAttribute('name') === `close`) {
+        optionsElement.style.left = `${
+          document.querySelector(`.sidebar`).offsetWidth -
+          optionsElement.offsetWidth +
+          1.5 * 32
+        }px`;
         optionsBtn.setAttribute('name', `options`);
       } else {
+        optionsElement.style.left = `${
+          document.querySelector(`.sidebar`).offsetWidth + 31.2
+        }px`;
         optionsBtn.setAttribute('name', `close`);
       }
     });
+
+    const deleteAllWorkoutsBtn = document.querySelector(`.delete--all`);
+    deleteAllWorkoutsBtn.addEventListener(
+      'click',
+      function (e) {
+        this.#showPopupForm(true);
+        this.globalEvent = null;
+      }.bind(this)
+    );
+  }
+  /////////////////////////////////
+  // Remove All Workouts Functions
+  #removeAllWorkouts() {
+    this.#workouts = [];
+    localStorage.removeItem('workouts');
+    document.querySelectorAll(`.workout`).forEach(el => {
+      el.parentNode.removeChild(el);
+    });
+    let i = 0;
+    this.#map.eachLayer(
+      function (layer) {
+        if (i > 1) {
+          this.#map.removeLayer(layer);
+        }
+        i++;
+      }.bind(this)
+    );
   }
   //////////////////////////
   // Editing Functions
@@ -312,21 +363,21 @@ class App {
         </span>
       </span>
       <div class="workout__details">
-        <span class="workout__icon">${
-          workout.type === 'running' ? '🏃‍♂️' : '🚴‍♀️'
-        }</span>
+        <img class='workout__icon emoji' src='./img/emojis/${
+          workout.type
+        }.png' alt=''/>
         <input type="text" class="workout--edit--input edit--distance" name="" value="${
           workout.distance
         }" />
       </div>
       <div class="workout__details">
-        <span class="workout__icon">⏱</span>
+      <img class='workout__icon emoji' src='./img/emojis/clock.png' alt=''/>
         <input type="text" class="workout--edit--input edit--duration" name="" value="${
           workout.duration
         }"/>
       </div>
       <div class="workout__details">
-        <span class="workout__icon">⚡️</span>
+      <img class='workout__icon emoji' src='./img/emojis/energy.png' alt=''/>
         <span class="workout__value">${
           workout.type === 'running'
             ? workout.pace.toFixed(1)
@@ -337,9 +388,11 @@ class App {
         }</span>
       </div>
       <div class="workout__details">
-        <span class="workout__icon">${
-          workout.type === 'running' ? '🦶🏼' : '⛰'
-        }</span>
+        ${
+          workout.type === 'running'
+            ? "<img class='workout__icon emoji' src='./img/emojis/foot.png' alt=''/>"
+            : "<img class='workout__icon emoji' src='./img/emojis/mountain.png' alt=''/>"
+        }
         <input type="text" class="workout--edit--input edit--cad--elev" name="" value="${
           workout.type === 'running'
             ? `${workout.cadence}`
@@ -361,7 +414,10 @@ class App {
     this.#map.flyTo(workout.coords, 15);
   }
 
-  #showPopupForm() {
+  #showPopupForm(multiple) {
+    document.querySelector(`.popup--text`).innerHTML = `Do you want to delete ${
+      multiple ? 'all workouts' : 'the workout'
+    } permanently? This effect is irreversible`;
     popupWrapper.classList.remove('hidden');
     setTimeout(
       () =>
@@ -491,7 +547,7 @@ class App {
         })
       )
       .setPopupContent(
-        `${workout.type === 'running' ? '🏃‍♂️' : '🚴‍♀️'} ${workout.description}`
+        `<img class='workout__icon emoji' src='./img/emojis/${workout.type}.png' alt=''/> <span>${workout.description}</span>`
       )
       .openPopup();
   }
@@ -510,14 +566,12 @@ class App {
       </span>
     </span>
       <div class="workout__details">
-        <span class="workout__icon">${
-          workout.type === 'running' ? '🏃‍♂️' : '🚴‍♀️'
-        }</span>
+        <img class='workout__icon emoji' src='./img/emojis/${workout.type}.png' alt=''/>
         <span class="workout__value">${workout.distance}</span>
         <span class="workout__unit">km</span>
       </div>
       <div class="workout__details">
-        <span class="workout__icon">⏱</span>
+      <img class='workout__icon emoji' src='./img/emojis/clock.png' alt=''/>
         <span class="workout__value">${workout.duration}</span>
         <span class="workout__unit">min</span>
       </div>`;
@@ -525,12 +579,12 @@ class App {
     if (workout.type === 'running') {
       html += `
       <div class="workout__details">
-        <span class="workout__icon">⚡️</span>
+      <img class='workout__icon emoji' src='./img/emojis/energy.png' alt=''/>
         <span class="workout__value">${workout.pace.toFixed(1)}</span>
         <span class="workout__unit">min/km</span>
       </div>
       <div class="workout__details">
-        <span class="workout__icon">🦶🏼</span>
+      <img class='workout__icon emoji' src='./img/emojis/foot.png' alt=''/>
         <span class="workout__value">${workout.cadence}</span>
         <span class="workout__unit">spm</span>
       </div>
@@ -540,12 +594,12 @@ class App {
     if (workout.type === 'cycling') {
       html += `
         <div class="workout__details">
-          <span class="workout__icon">⚡️</span>
+          <img class='workout__icon emoji' src='./img/emojis/energy.png' alt=''/>
           <span class="workout__value">${workout.speed.toFixed(1)}</span>
           <span class="workout__unit">km/h</span>
         </div>
         <div class="workout__details">
-          <span class="workout__icon">⛰</span>
+          <img class='workout__icon emoji' src='./img/emojis/mountain.png' alt=''/>
           <span class="workout__value">${workout.elevationGain}</span>
           <span class="workout__unit">m</span>
         </div>
@@ -568,7 +622,6 @@ class App {
 
   #loadWorkouts() {
     const data = JSON.parse(localStorage.getItem('workouts'));
-
     if (!data) return;
     let workout;
     data.forEach(
